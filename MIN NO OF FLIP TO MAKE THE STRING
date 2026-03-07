@@ -1,0 +1,33 @@
+/**
+ * @param {string} s
+ * @return {number}
+ */
+var minFlips = function(s) {
+    const n = s.length;
+    const doubled = s + s;
+    
+    let diff1 = 0; 
+    let diff2 = 0; 
+    let minFlips = Infinity;
+
+    for (let i = 0; i < doubled.length; i++) {
+        const target1 = i % 2 === 0 ? '0' : '1';
+        const target2 = i % 2 === 0 ? '1' : '0';
+        if (doubled[i] !== target1) diff1++;
+        if (doubled[i] !== target2) diff2++;
+        if (i >= n) {
+            const leftIdx = i - n;
+            const leftTarget1 = leftIdx % 2 === 0 ? '0' : '1';
+            const leftTarget2 = leftIdx % 2 === 0 ? '1' : '0';
+
+            if (doubled[leftIdx] !== leftTarget1) diff1--;
+            if (doubled[leftIdx] !== leftTarget2) diff2--;
+        }
+        if (i >= n - 1) {
+            minFlips = Math.min(minFlips, diff1, diff2);
+        }
+    }
+
+    return minFlips;
+};
+
