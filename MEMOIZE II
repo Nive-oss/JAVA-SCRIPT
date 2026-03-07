@@ -1,0 +1,36 @@
+/**
+ * @param {Function} fn
+ * @return {Function}
+ */
+function memoize(fn) {
+    // The root map stores references to the first argument
+    const cache = new Map();
+    
+    // A unique Symbol to act as a key for the final result
+    // This prevents collisions if an argument happens to be the result itself
+    const RESULT = Symbol('result');
+
+    return function(...args) {
+        let currentLevel = cache;
+
+        // Traverse the nested maps for each argument
+        for (const arg of args) {
+            if (!currentLevel.has(arg)) {
+                currentLevel.set(arg, new Map());
+            }
+            currentLevel = currentLevel.get(arg);
+        }
+
+        // Check if the result for this specific path already exists
+        if (currentLevel.has(RESULT)) {
+            return currentLevel.get(RESULT);
+        }
+
+        // Otherwise, call the original function and store the result
+        const result = fn(...args);
+        currentLevel.set(RESULT, result);
+        
+        return result;
+    }
+}
+
