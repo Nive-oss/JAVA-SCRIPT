@@ -1,0 +1,32 @@
+/**
+ * @param {number} rowsCount
+ * @param {number} colsCount
+ * @return {Array<Array<number>>}
+ */
+Array.prototype.snail = function(rowsCount, colsCount) {
+    
+    if (rowsCount * colsCount !== this.length) {
+        return [];
+    }
+
+    
+    const result = Array.from({ length: rowsCount }, () => []);
+
+    
+    for (let i = 0; i < this.length; i++) {
+        
+        const col = Math.floor(i / rowsCount);
+        
+        
+        const rowIndex = i % rowsCount;
+        
+        
+        const actualRow = (col % 2 === 0) 
+            ? rowIndex 
+            : (rowsCount - 1 - rowIndex);
+
+        result[actualRow][col] = this[i];
+    }
+
+    return result;
+}
