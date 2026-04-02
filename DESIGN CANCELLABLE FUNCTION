@@ -1,0 +1,45 @@
+/**
+ * @param {Generator} generator
+ * @return {[Function, Promise]}
+ */
+var cancellable = function(generator) {
+    let cancel;
+    const cancelPromise = new Promise((_, reject) => {
+        cancel = () => reject("Cancelled");
+    });
+
+    // We use an async function to handle the generator's lifecycle
+    const promise = (async () => {
+        let nextValue;
+        let isError = false;
+
+        while (true) {
+            try {
+                // Determine if we need to throw an error or pass a value back
+                const step = isError 
+                    ? generator.throw(nextValue) 
+                    : generator.next(nextValue);
+
+                if (step.done) {
+                    return step.value;
+                }
+
+                // Race the yielded promise against the cancellation trigger
+                try {
+                    nextValue = await Promise.race([step.value, cancelPromise]);
+                    isError = false;
+                } catch (e) {
+                    // If the race yields an error (rejection or "Cancelled"), 
+                    // we catch it here to throw it back into the generator in the next loop
+                    nextValue = e;
+                    isError = true;
+                }
+            } catch (err) {
+                // If the generator itself throws an uncaught error, the promise rejects
+                throw err;
+            }
+        }
+    })();
+
+    return [cancel, promise];
+};
